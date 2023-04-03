@@ -6,7 +6,10 @@ on:
 
 jobs:
   make-questions:
-    if: github.event.discussion.category.slug == 'galaxy-brain-request'
+    if: >
+      github.event.discussion.category.slug == 'galaxy-brain-request' 
+      && github.event.discussion.state == 'open' 
+      && github.event.label.name == 'help wanted'
     runs-on: ubuntu-latest
     steps:
      - uses: actions/checkout@v3
