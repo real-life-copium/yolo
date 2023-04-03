@@ -137,7 +137,10 @@ async function answer() {
 
   /**
    * @returns {Promise<{
-   *    node: { body: string }
+   *    node: {
+   *      body: string
+   *      discussion: { id: string }
+   *   }
    * }>}
    */
   function getCallbackComment() {
@@ -146,7 +149,10 @@ async function answer() {
     return octokit.graphql(
       `query($queryInput: ID!) {
         node(id: $queryInput) {
-          ... on DiscussionComment { body }
+          ... on DiscussionComment {
+            body
+            discussion { id }
+          }
         }
       }`,
       { queryInput },
@@ -156,10 +162,11 @@ async function answer() {
   /**
    * Update the callback comment with the answer.
    * @param {string[]} lines
+   * @param {string} discussionId
    * @param {boolean} allSolved
    * @returns {Promise<never>}
    */
-  function updateCallback(lines, allSolved) {
+  function updateCallback(lines, discussionId, allSolved) {
     const updateInput = {
       commentId: cbNodeId,
       body: [
@@ -172,7 +179,7 @@ async function answer() {
     if (allSolved) {
       updateInput.body += "\n\nAll questions have been answered!";
       const closeInput = {
-        discussionId: payload.discussion.node_id,
+        discussionId,
         reason: "RESOLVED",
       };
       return octokit.graphql(
@@ -202,7 +209,7 @@ async function answer() {
   }
 
   await finalizeDiscussion();
-  const { node: { body } } = await getCallbackComment();
+  const { node: { body, discussion } } = await getCallbackComment();
   const lines = body.split("\n").slice(1);
 
   const questionNumber = payload.discussion.number;
@@ -214,7 +221,8 @@ async function answer() {
     }
   }
 
-  await updateCallback(lines, lines.every((line) => line.includes("[x]")));
+  const allSolved = lines.every((line) => line.includes("[x]"));
+  await updateCallback(lines, discussion.id, allSolved);
 }
 
 async function main() {
