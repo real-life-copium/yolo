@@ -99,8 +99,7 @@ async function main() {
 }
 
 try {
-  await main();
+  main();
 } catch (error) {
-  console.log(JSON.stringify(github.context.payload, null, 2));
   core.setFailed(error.message);
 }
