@@ -7,7 +7,7 @@ const categories = {
 };
 
 async function request() {
-  const octokit = github.getOctokit(github.context.token);
+  const octokit = github.getOctokit(core.getInput('token'));
   const payload = github.context.payload;
   const number = payload.discussion.number;
   const author = payload.discussion.author.login;

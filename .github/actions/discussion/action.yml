@@ -1,5 +1,9 @@
 name: yolo-discussion
-decription: Autoamte discussion stuff.
+decription: Automate discussion stuff.
+inputs:
+  token:
+    description: Secret token.
+    required: true
 runs:
   using: node16
   main: yolo.js

@@ -12,6 +12,8 @@ jobs:
       && github.event.label.name == 'help wanted'
     runs-on: ubuntu-latest
     steps:
-     - uses: actions/checkout@v3
-     - uses: ./.github/actions/discussion
-       id: request
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/discussion
+        id: request
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
