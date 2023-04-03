@@ -142,9 +142,7 @@ async function answer() {
    */
   function getCallbackComment() {
     // Get the body of the callback comment
-    const queryInput = {
-      id: cbNodeId,
-    };
+    const queryInput = cbNodeId;
     return octokit.graphql(
       `query($queryInput: ID!) {
         node(id: $queryInput) {
