@@ -10,7 +10,7 @@ async function request() {
   const octokit = github.getOctokit(core.getInput('token'));
   const payload = github.context.payload;
   const number = payload.discussion.number;
-  const author = payload.discussion.author.login;
+  const author = payload.discussion.user.login;
 
   function addComment() {
     const input = {
@@ -85,5 +85,6 @@ async function main() {
 try {
   main();
 } catch (error) {
+  console.log(JSON.stringify(github.context.payload, null, 2));
   core.setFailed(error.message);
 }
