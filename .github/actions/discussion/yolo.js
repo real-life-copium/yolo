@@ -26,9 +26,7 @@ async function request() {
     return octokit.graphql(
       `mutation($input: AddDiscussionCommentInput!) {
         addDiscussionComment(input: $input) {
-          comment {
-            id
-          }
+          comment { id }
         }
       }`,
       { input },
@@ -51,9 +49,7 @@ async function request() {
     return octokit.graphql(
       `mutation($input: UpdateDiscussionCommentInput!) {
       updateDiscussionComment(input: $input) {
-        comment {
-          id
-        }
+        comment { id }
       }
     }`,
       { input },
@@ -83,9 +79,7 @@ async function request() {
     return octokit.graphql(
       `mutation($input: CreateDiscussionInput!) {
         createDiscussion(input: $input) {
-          discussion {
-            number
-          }
+          discussion { number }
         }
       }`,
       { input },
@@ -130,8 +124,12 @@ async function answer() {
         $answerInput: MarkDiscussionCommentAsAnswerInput!,
         $closeInput: CloseDiscussionInput!
       ) {
-        markDiscussionCommentAsAnswer(input: $answerInput)
-        closeDiscussion(input: $closeInput)
+        markDiscussionCommentAsAnswer(input: $answerInput) {
+          clientMutationId
+        }
+        closeDiscussion(input: $closeInput) {
+          clientMutationId
+        }
       }`,
       { answerInput, closeInput },
     );
@@ -150,9 +148,7 @@ async function answer() {
     return octokit.graphql(
       `query($queryInput: ID!) {
         node(id: $queryInput) {
-          ... on DiscussionComment {
-            body
-          }
+          ... on DiscussionComment { body }
         }
       }`,
       { queryInput },
@@ -186,8 +182,12 @@ async function answer() {
           $updateInput: UpdateDiscussionCommentInput!,
           $closeInput: CloseDiscussionInput!
         ) {
-          updateDiscussionComment(input: $updateInput)
-          closeDiscussion(input: $closeInput)
+          updateDiscussionComment(input: $updateInput) {
+            comment { id }
+          }
+          closeDiscussion(input: $closeInput) {
+            clientMutationId
+          }
         }`,
         { updateInput, closeInput },
       );
@@ -195,7 +195,9 @@ async function answer() {
 
     return octokit.graphql(
       `mutation($updateInput: UpdateDiscussionCommentInput!) {
-        updateDiscussionComment(input: $updateInput)
+        updateDiscussionComment(input: $updateInput) {
+          comment { id }
+        }
       }`,
       { updateInput },
     );
