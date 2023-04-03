@@ -1,3 +1,5 @@
+// @ts-check
+
 const core = require("@actions/core");
 const github = require("@actions/github");
 
@@ -29,6 +31,11 @@ async function request() {
     );
   }
 
+  /**
+   * @param {string} commentId
+   * @param {number[]} numbers
+   * @returns {Promise<never>}
+   */
   function updateComment(commentId, numbers) {
     const input = {
       commentId,
@@ -50,6 +57,15 @@ async function request() {
   }
 
   const NUMBER_OF_QUESTIONS = 2;
+
+  /**
+   * @param {string} cbNodeId
+   * @param {number} current
+   * @param {number} total
+   * @returns {Promise<{
+   *   createDiscussion: { discussion: { number: number }}
+   * }>}
+   */
   function ask(cbNodeId, current, total = NUMBER_OF_QUESTIONS) {
     const input = {
       repositoryId: payload.repository.node_id,
@@ -73,8 +89,6 @@ async function request() {
   }
 
   const { addDiscussionComment: { comment } } = await addComment();
-  console.log(JSON.stringify(data, null, 2));
-
   const discussions = [];
 
   for (let i = 1; i <= NUMBER_OF_QUESTIONS; i++) {
