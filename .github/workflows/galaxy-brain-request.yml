@@ -1,4 +1,5 @@
 name: galaxy-brain-request
+run-name: "Galaxy Brain Request #${{ github.event.discussion.number }}"
 
 on:
   discussion:

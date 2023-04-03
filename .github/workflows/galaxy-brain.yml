@@ -1,4 +1,5 @@
 name: galaxy-brain
+run-name: "Galaxy Brain #${{ github.event.discussion.number }}"
 
 on:
   discussion_comment:
@@ -6,8 +7,14 @@ on:
 
 jobs:
   mark-as-answers:
-    if: github.event.discussion.category.slug == 'galaxy-brain'
+    if: >
+      github.event.discussion.category.slug == 'galaxy-brain' 
+      && github.event.discussion.state == 'open' 
+      && contains(github.event.discussion.title, github.actor)
     runs-on: ubuntu-latest
     steps:
-       - uses: actions/checkout@v3
-       - uses: ./.github/actions/discussion
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/discussion
+        id: answer
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

@@ -8,8 +8,12 @@ const categories = {
   question: "DIC_kwDOJJzAY84CVZ_2",
 };
 
+function getOctokit() {
+  return github.getOctokit(core.getInput("token"));
+}
+
 async function request() {
-  const octokit = github.getOctokit(core.getInput("token"));
+  const octokit = getOctokit();
   const payload = github.context.payload;
   const number = payload.discussion.number;
   const author = payload.discussion.user.login;
@@ -21,12 +25,12 @@ async function request() {
     };
     return octokit.graphql(
       `mutation($input: AddDiscussionCommentInput!) {
-      addDiscussionComment(input: $input) {
-        comment {
-          id
+        addDiscussionComment(input: $input) {
+          comment {
+            id
+          }
         }
-      }
-    }`,
+      }`,
       { input },
     );
   }
@@ -78,12 +82,12 @@ async function request() {
     };
     return octokit.graphql(
       `mutation($input: CreateDiscussionInput!) {
-      createDiscussion(input: $input) {
-        discussion {
-          number
+        createDiscussion(input: $input) {
+          discussion {
+            number
+          }
         }
-      }
-    }`,
+      }`,
       { input },
     );
   }
@@ -98,6 +102,121 @@ async function request() {
   await updateComment(comment.id, discussions);
 }
 
+async function answer() {
+  const octokit = getOctokit();
+  const payload = github.context.payload;
+  /** @type {string[]} */
+  const bodyLines = payload.discussion.body.split("\n");
+  const cbLine = bodyLines.find((line) => line.startsWith("Callback:"));
+  if (!cbLine) {
+    throw new Error("No callback line");
+  }
+  const cbNodeId = cbLine.split(":")[1].trim();
+
+  /**
+   * Mark the question as answered and close it.
+   * @returns {Promise<never>}
+   */
+  function finalizeDiscussion() {
+    const answerInput = {
+      id: payload.comment.node_id,
+    };
+    const closeInput = {
+      discussionId: payload.discussion.node_id,
+      reason: "RESOLVED",
+    };
+    return octokit.graphql(
+      `mutation(
+        $answerInput: MarkDiscussionCommentAsAnswerInput!,
+        $closeInput: CloseDiscussionInput!
+      ) {
+        markDiscussionCommentAsAnswer(input: $answerInput)
+        closeDiscussion(input: $closeInput)
+      }`,
+      { answerInput, closeInput },
+    );
+  }
+
+  /**
+   * @returns {Promise<{
+   *    node: { body: string }
+   * }>}
+   */
+  function getCallbackComment() {
+    // Get the body of the callback comment
+    const queryInput = {
+      id: cbNodeId,
+    };
+    return octokit.graphql(
+      `query($queryInput: ID!) {
+        node(id: $queryInput) {
+          ... on DiscussionComment {
+            body
+          }
+        }
+      }`,
+      { queryInput },
+    );
+  }
+
+  /**
+   * Update the callback comment with the answer.
+   * @param {string[]} lines
+   * @param {boolean} allSolved
+   * @returns {Promise<never>}
+   */
+  function updateCallback(lines, allSolved) {
+    const updateInput = {
+      commentId: cbNodeId,
+      body: [
+        `@${payload.comment.user.login}`,
+        ...lines,
+      ].join("\n"),
+    };
+
+    // update and close the discussion if all questions have been answered
+    if (allSolved) {
+      updateInput.body += "\n\nAll questions have been answered!";
+      const closeInput = {
+        discussionId: payload.discussion.node_id,
+        reason: "RESOLVED",
+      };
+      return octokit.graphql(
+        `mutation(
+          $updateInput: UpdateDiscussionCommentInput!,
+          $closeInput: CloseDiscussionInput!
+        ) {
+          updateDiscussionComment(input: $updateInput)
+          closeDiscussion(input: $closeInput)
+        }`,
+        { updateInput, closeInput },
+      );
+    }
+
+    return octokit.graphql(
+      `mutation($updateInput: UpdateDiscussionCommentInput!) {
+        updateDiscussionComment(input: $updateInput)
+      }`,
+      { updateInput },
+    );
+  }
+
+  await finalizeDiscussion();
+  const { node: { body } } = await getCallbackComment();
+  const lines = body.split("\n").slice(1);
+
+  const questionNumber = payload.discussion.number;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.includes(`#${questionNumber}`)) {
+      lines[i] = line.replace("[ ]", "[x]");
+      break;
+    }
+  }
+
+  await updateCallback(lines, lines.every((line) => line.includes("[x]")));
+}
+
 async function main() {
   const action = github.context.action;
   switch (action) {
@@ -106,6 +225,9 @@ async function main() {
         core.setSkipped("Already commented");
       }
       await request();
+      break;
+    case "answer":
+      await answer();
       break;
     default:
       throw new Error(`Unknown type: ${action}`);
