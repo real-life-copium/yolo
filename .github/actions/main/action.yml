@@ -1,5 +1,0 @@
-name: 'Dump Properties'
-decription: 'Some properties I might need to use'
-runs:
-  using: 'node16'
-  main: yolo.js

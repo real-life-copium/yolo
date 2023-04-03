@@ -1,0 +1,12 @@
+name: galaxy-brain
+
+on:
+  discussion_comment:
+    types: [created]
+
+jobs:
+  if: github.event.discussion.category.slug == "galaxy-brain"
+  runs-on: ubuntu-latest
+  steps:
+     - uses: actions/checkout@v3
+     - uses: ./.github/actions/discussion

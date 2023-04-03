@@ -1,0 +1,5 @@
+name: yolo-discussion
+decription: Autoamte discussion stuff.
+runs:
+  using: node16
+  main: yolo.js

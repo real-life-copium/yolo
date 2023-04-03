@@ -1,0 +1,14 @@
+name: galaxy-brain-request
+
+on:
+  discussion:
+    types: [labeled]
+
+jobs:
+  make-questions:
+    if: github.event.discussion.category.slug == "galaxy-brain-request"
+    runs-on: ubuntu-latest
+    steps:
+     - uses: actions/checkout@v3
+     - uses: ./.github/actions/discussion
+       id: request
