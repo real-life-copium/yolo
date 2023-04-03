@@ -1,0 +1,95 @@
+{
+  repository(name: "yolo", owner: "real-life-copium") {
+    discussions(categoryId: "DIC_kwDOJJzAY84CVZ_1", first: 10, states: OPEN) {
+      edges {
+        node {
+          id
+          author {
+            login
+          }
+          comments(first: 10) {
+            totalCount
+            nodes {
+              bodyText
+            }
+          }
+          authorAssociation
+        }
+      }
+      totalCount
+    }
+  }
+  viewer {
+    login
+  }
+}
+
+mutation {
+  addDiscussionComment(
+    input: {discussionId: "D_kwDOJJzAY84ATKZV", body: "@pseudocc\n- [ ] #1\n- [ ] #2"}
+  ) {
+    comment {
+      id
+    }
+  }
+}
+
+mutation {
+  updateDiscussionComment(
+    input: {commentId: "DC_kwDOJJzAY84AU5le", body: "@pseudocc\n- [x] #1\n- [ ] #2"}
+  ) {
+    comment {
+      id
+    }
+  }
+}
+
+mutation {
+  createDiscussion(
+    input: {repositoryId: "R_kgDOJJzAYw", title: "Request #12 (1/2)", body: "@pseudocc\nDC_kwDOJJzAY84AU5le", categoryId: "DIC_kwDOJJzAY84CVZ_2"}
+  ) {
+    discussion {
+      number
+    }
+  }
+}
+
+{
+  repository(name: "yolo", owner: "real-life-copium") {
+    discussions(categoryId: "DIC_kwDOJJzAY84CVZ_2", first: 10, states: OPEN) {
+      edges {
+        node {
+          id
+          author {
+            login
+          }
+          comments(first: 10) {
+            totalCount
+            nodes {
+              bodyText
+              author {
+                login
+              }
+              id
+            }
+          }
+          authorAssociation
+        }
+      }
+      totalCount
+    }
+  }
+  viewer {
+    login
+  }
+}
+
+mutation {
+  markDiscussionCommentAsAnswer(input: {id: "DC_kwDOJJzAY84AU5pH"}) {
+    clientMutationId
+  }
+  closeDiscussion(input: {discussionId: "D_kwDOJJzAY84ATKcI", reason: RESOLVED}) {
+    clientMutationId
+  }
+}
+

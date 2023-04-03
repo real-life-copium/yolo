@@ -6,7 +6,7 @@ on:
 
 jobs:
   mark-as-answers:
-    if: github.event.discussion.category.slug == "galaxy-brain"
+    if: github.event.discussion.category.slug == 'galaxy-brain'
     runs-on: ubuntu-latest
     steps:
        - uses: actions/checkout@v3
