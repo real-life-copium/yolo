@@ -48,10 +48,10 @@ async function request() {
     };
     return octokit.graphql(
       `mutation($input: UpdateDiscussionCommentInput!) {
-      updateDiscussionComment(input: $input) {
-        comment { id }
-      }
-    }`,
+        updateDiscussionComment(input: $input) {
+          comment { id }
+        }
+      }`,
       { input },
     );
   }
@@ -68,6 +68,7 @@ async function request() {
    */
   function ask(cbNodeId, current, total = NUMBER_OF_QUESTIONS) {
     const input = {
+      // @ts-ignore
       repositoryId: payload.repository.node_id,
       title: `Request #${number} from ${author} (${current}/${total})`,
       body: [
@@ -113,6 +114,7 @@ async function answer() {
    */
   function finalizeDiscussion() {
     const answerInput = {
+      // @ts-ignore
       id: payload.comment.node_id,
     };
     const closeInput = {
@@ -170,6 +172,7 @@ async function answer() {
     const updateInput = {
       commentId: cbNodeId,
       body: [
+        // @ts-ignore
         `@${payload.comment.user.login}`,
         ...lines,
       ].join("\n"),
@@ -230,7 +233,7 @@ async function main() {
   switch (action) {
     case "request":
       if (github.context.payload.discussion.comments !== 0) {
-        core.setSkipped("Already commented");
+        core.setFailed("Already commented");
       }
       await request();
       break;
